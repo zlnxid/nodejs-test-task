@@ -1,5 +1,12 @@
 const config = require('./config');
-const log = require('./logger');
+const createLogger = require('./logger');
 const createTask = require('./scheduler');
 
-createTask("Running task", config.interval, () => { log("running") });
+const log = createLogger(config.appName);
+
+createTask(
+    "Running task",
+    config.interval,
+    () => { log("running") },
+    log
+);
