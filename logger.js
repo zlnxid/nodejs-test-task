@@ -1,7 +1,7 @@
-const config = require("./config");
-
-const logger = (message) => {
-    console.log('[' + config.appName + '] ' + message);
+const createLogger = (appName) => {
+    return (message) => {
+        console.log(`[${appName}] ${message}`);
+    };
 };
 
-module.exports = logger;
+module.exports = createLogger;
