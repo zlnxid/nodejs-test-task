@@ -1,8 +1,6 @@
-const log = require("./logger");
+const createTask = (name, interval, task, log) => {
+    log(`Task scheduled: ${name}`);
 
-log("Scheduler started");
-
-const createTask = (name, interval, task) => {
     setInterval(() => {
         log("Executing task: " + name);
         task();
