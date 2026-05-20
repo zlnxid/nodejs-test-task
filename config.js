@@ -23,3 +23,4 @@ function validateConfig(config) {
 validateConfig(config);
 
 module.exports = config;
+module.exports.validateConfig = validateConfig;
