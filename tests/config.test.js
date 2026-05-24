@@ -1,5 +1,5 @@
-const config = require("./config");
-const { ConfigError } = require("./errors");
+const config = require("../config");
+const { ConfigError } = require("../errors");
 
 describe("Config", () => {
 

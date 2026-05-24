@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const request = require("supertest");
-const createServer = require("./server");
+const createServer = require("../server");
 
 const server = createServer();
 

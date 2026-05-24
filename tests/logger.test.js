@@ -1,5 +1,5 @@
-const createLogger = require("./logger");
-const { ValidationError } = require("./errors");
+const createLogger = require("../logger");
+const { ValidationError } = require("../errors");
 
 describe("Logger", () => {
 
