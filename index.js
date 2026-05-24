@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const {ValidationError, TaskExecutionError, ConfigError} = require("./errors");
 const config = require('./config');
 const createLogger = require('./logger');
