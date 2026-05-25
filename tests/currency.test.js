@@ -110,4 +110,23 @@ describe('Currency API', () => {
 
         expect(response.statusCode).toBe(204);
     });
+
+    test('GET /currencies/price', async () => {
+
+        await request(server)
+            .post('/currencies')
+            .set(authHeader)
+            .send({
+                name: 'Bitcoin',
+                ticker: 'BTC'
+            });
+
+        const response = await request(server)
+            .get('/currencies/price?currency=BTC')
+            .set(authHeader);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(Array.isArray(response.body)).toBe(true);
+    });
 });
