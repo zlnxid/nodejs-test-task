@@ -1,0 +1,130 @@
+openapi: 3.0.0
+
+info:
+  title: Node Scheduler API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+
+  /status:
+    get:
+      summary: Server status
+
+      responses:
+        '200':
+          description: OK
+
+  /currencies:
+    get:
+      summary: Get all currencies
+
+      responses:
+        '200':
+          description: List of currencies
+
+    post:
+      summary: Create currency
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyInput'
+
+      responses:
+        '201':
+          description: Currency created
+
+  /currencies/{id}:
+
+    get:
+      summary: Get currency by id
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Currency found
+
+        '404':
+          description: Currency not found
+
+    put:
+      summary: Update currency
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+
+          schema:
+            type: integer
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyInput'
+
+      responses:
+        '200':
+          description: Currency updated
+
+    delete:
+      summary: Delete currency
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+
+          schema:
+            type: integer
+
+      responses:
+        '204':
+          description: Currency deleted
+
+components:
+
+  schemas:
+
+    Currency:
+      type: object
+
+      properties:
+        id:
+          type: integer
+
+        name:
+          type: string
+
+        ticker:
+          type: string
+
+    CurrencyInput:
+      type: object
+
+      required:
+        - name
+        - ticker
+
+      properties:
+        name:
+          type: string
+
+        ticker:
+          type: string
