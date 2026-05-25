@@ -1,4 +1,5 @@
 const storage = require('./currency.storage');
+const priceService = require('./price.service');
 
 const getAllCurrencies = (req, res) => {
     res.status(200).json(storage.getAll());
@@ -64,10 +65,37 @@ const deleteCurrency = (req, res) => {
     res.status(204).send();
 };
 
+const getPrices = async (req, res) => {
+
+    const { currency } = req.query;
+
+    if (!currency) {
+        return res.status(400).json({ message: "Currency is required" });
+    }
+
+    const currencies = storage.getAll();
+
+    const exists = currencies.find(
+        c => c.ticker.toUpperCase() === currency.toUpperCase()
+    );
+
+    if (!exists) {
+        return res.status(404).json({ message: "Currency not found" });
+    }
+
+    try {
+        const prices = await priceService.getPricesByCurrency(currency);
+        return res.status(200).json(prices);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getAllCurrencies,
     getCurrencyById,
     createCurrency,
     updateCurrency,
-    deleteCurrency
+    deleteCurrency,
+    getPrices
 };

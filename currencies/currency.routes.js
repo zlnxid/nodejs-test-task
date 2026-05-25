@@ -4,6 +4,8 @@ const router = express.Router();
 
 router.get("/", controller.getAllCurrencies);
 
+router.get("/price", controller.getPrices);
+
 router.get("/:id", controller.getCurrencyById);
 
 router.post("/", controller.createCurrency);
