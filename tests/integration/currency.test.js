@@ -2,9 +2,9 @@ require("dotenv").config();
 
 const request = require('supertest');
 
-const createServer = require('../server');
+const createServer = require('../../src/core/server');
 
-const storage = require('../currencies/currency.storage');
+const storage = require('../../src/currencies/currency.storage');
 
 describe('Currency API', () => {
 

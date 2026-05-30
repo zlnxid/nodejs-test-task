@@ -3,7 +3,7 @@ const {
     ValidationError,
     TaskExecutionError,
     ConfigError
-} = require("../errors");
+} = require("../../../../src/common/utils/errors");
 
 describe("Errors", () => {
 

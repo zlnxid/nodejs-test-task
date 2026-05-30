@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-const {ValidationError, TaskExecutionError, ConfigError} = require("./errors");
-const config = require('./config');
-const createLogger = require('./logger');
-const createTask = require('./scheduler');
-const createServer = require('./server');
+const {ValidationError, TaskExecutionError, ConfigError} = require("./src/common/utils/errors");
+const config = require('./src/common/config/config');
+const createLogger = require('./src/common/utils/logger');
+const createTask = require('./src/core/scheduler');
+const createServer = require('./src/core/server');
 
 const log = createLogger(config.appName);
 

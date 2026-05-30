@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const createLogger = require("../logger");
+const createLogger = require("../common/utils/logger");
 const logger = createLogger("PriceService");
 
 const BINANCE_API_URL = process.env.BINANCE_API_URL;

@@ -1,12 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
-const authMiddleware = require('./auth.middleware');
+const authMiddleware = require('../common/middleware/auth.middleware');
 
 const swaggerUi = require("swagger-ui-express");
 const YAML = require('yamljs');
 
-const currencyRoutes = require('./currencies/currency.routes');
+const currencyRoutes = require('../currencies/currency.routes');
 
 const createServer = () => {
     const server = express();
