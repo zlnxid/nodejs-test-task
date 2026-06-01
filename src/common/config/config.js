@@ -1,4 +1,4 @@
-const {ConfigError} = require("./errors");
+const {ConfigError} = require("../utils/errors");
 const config = {
     appName: "NodeScheduler",
     interval: 10

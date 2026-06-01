@@ -1,4 +1,4 @@
-const { ValidationError, TaskExecutionError } = require("./errors");
+const { ValidationError, TaskExecutionError } = require("../common/utils/errors");
 
 const createTask = (name, interval, task, log) => {
 
