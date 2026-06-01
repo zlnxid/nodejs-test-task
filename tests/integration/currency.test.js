@@ -4,14 +4,14 @@ const request = require('supertest');
 
 const createServer = require('../../src/core/server');
 
-const storage = require('../../src/currencies/currency.storage');
+const repository = require('../../src/currencies/currency.repository');
 
 describe('Currency API', () => {
 
     let server;
 
-    beforeEach(() => {
-        storage.clear();
+    beforeEach(async () => {
+        await repository.clear();
         server = createServer();
     });
 

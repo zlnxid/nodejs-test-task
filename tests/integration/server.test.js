@@ -2,12 +2,12 @@ require("dotenv").config();
 
 const request = require("supertest");
 const createServer = require("../../src/core/server");
-const storage = require("../../src/currencies/currency.storage");
+const repository = require('../../src/currencies/currency.repository');
 
 const server = createServer();
 
-beforeEach(() => {
-    storage.clear();
+beforeEach(async () => {
+    await repository.clear();
 })
 
 describe("GET /status", () => {
@@ -143,6 +143,26 @@ describe("Currency CRUD", () => {
             .send({});
         expect(response.status).toBe(400);
     });
+
+    it("should return 409 for duplicate ticker", async () => {
+        await request(server)
+            .post("/currencies")
+            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .send({
+                name:"Bitcoin",
+                ticker: "BTC"
+            });
+
+        const response = await request(server)
+            .post("/currencies")
+            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .send({
+                name: "Another Bitcoin",
+                ticker: "BTC"
+            });
+
+        expect(response.status).toBe(409);
+    })
 });
 
 describe("GET /currencies/price", () => {
