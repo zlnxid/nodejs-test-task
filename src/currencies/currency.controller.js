@@ -1,9 +1,8 @@
-const repository = require('./currency.repository');
-const priceService = require('./price.service');
+const service = require('./currency.service');
 
 const getAllCurrencies = async (req, res) => {
     try {
-        const currencies = await repository.getAll();
+        const currencies = await service.getAllCurrencies();
         res.status(200).json(currencies);
     } catch (error) {
         res.status(500).json({message: error.message});
@@ -12,13 +11,12 @@ const getAllCurrencies = async (req, res) => {
 
 const getCurrencyById = async (req, res) => {
     try {
-        const currency = await repository.getById(req.params.id);
-        if (!currency) {
-            return res.status(404).json({message: "Currency not found"});
-        }
-
+        const currency = await service.getCurrencyById(req.params.id);
         res.status(200).json(currency);
     } catch (error) {
+        if (error.message === "Currency not found") {
+            return res.status(404).json({message: error.message});
+        }
         res.status(500).json({message: error.message});
     }
 };
@@ -26,15 +24,14 @@ const getCurrencyById = async (req, res) => {
 const createCurrency = async (req, res) => {
     try {
         const {name, ticker} = req.body;
-
-        if (!name || !ticker) {
-            return res.status(400).json({message: "Name and ticker are required"});
-        }
-        const currency = await repository.create({name, ticker});
+        const currency = await service.createCurrency({name, ticker});
         res.status(201).json(currency);
     } catch (error) {
-        if (error.message.includes('UNIQUE')) {
-            return res.status(409).json({message: "Currency already exists"});
+        if (error.message === "Currency already exists") {
+            return res.status(409).json({message: error.message});
+        }
+        if (error.message === "Name and ticker are required") {
+            return res.status(400).json({message: error.message});
         }
         res.status(500).json({message: error.message});
     }
@@ -42,16 +39,14 @@ const createCurrency = async (req, res) => {
 
 const updateCurrency = async (req, res) => {
     try {
-        const currency = await repository.update(req.params.id, req.body);
-
-        if (!currency) {
-            return res.status(404).json({message: "Currency not found"});
-        }
-
+        const currency = await service.updateCurrency(req.params.id, req.body);
         res.status(200).json(currency);
     } catch (error) {
-        if (error.message.includes('UNIQUE')) {
-            return res.status(409).json({message: "Currency already exists"});
+        if (error.message === "Currency not found") {
+            return res.status(404).json({message: error.message});
+        }
+        if (error.message === "Currency already exists") {
+            return res.status(409).json({message: error.message});
         }
         res.status(500).json({message: error.message});
     }
@@ -59,14 +54,12 @@ const updateCurrency = async (req, res) => {
 
 const deleteCurrency = async (req, res) => {
     try {
-        const deleted = await repository.remove(req.params.id);
-
-        if (!deleted) {
-            return res.status(404).json({message: "Currency not found"});
-        }
-
+        await service.deleteCurrency(req.params.id);
         res.status(204).send();
     } catch (error) {
+        if (error.message === "Currency not found") {
+            return res.status(404).json({message: error.message});
+        }
         res.status(500).json({message: error.message});
     }
 };
@@ -74,24 +67,15 @@ const deleteCurrency = async (req, res) => {
 const getPrices = async (req, res) => {
     try {
         const {currency} = req.query;
-
-        if (!currency) {
-            return res.status(400).json({message: "Currency is required"});
-        }
-
-        const currencies = await repository.getAll();
-        const exists = currencies.find(c => c.ticker.toUpperCase() === currency.toUpperCase());
-        if (!exists) {
-            return res.status(404).json({message: "Currency not found"});
-        }
-
-        try {
-            const prices = await priceService.getPricesByCurrency(currency);
-            return res.status(200).json(prices);
-        } catch (error) {
-            res.status(500).json({message: error.message});
-        }
+        const prices = await service.getPricesByCurrency(currency);
+        return res.status(200).json(prices);
     } catch (error) {
+        if (error.message === "Currency is required") {
+            return res.status(400).json({message: error.message});
+        }
+        if (error.message === "Currency not found") {
+            return res.status(404).json({message: error.message});
+        }
         res.status(500).json({message: error.message});
     }
 };
