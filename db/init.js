@@ -1,13 +1,15 @@
 const db = require('./connection');
+const createLogger = require('../src/common/utils/logger');
+const log = createLogger("DatabaseInit");
 
 const createTable = () => {
     const sql = 'CREATE TABLE IF NOT EXISTS currencies (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ticker TEXT NOT NULL UNIQUE)';
 
     db.run(sql, (err) => {
         if (err) {
-            console.error('Ошибка создания таблицы: ', err.message);
+            log.error('Ошибка создания таблицы: ', err.message);
         } else {
-            console.log('Таблица создана');
+            log.info('Таблица создана');
         }
     });
 };

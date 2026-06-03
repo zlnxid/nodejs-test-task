@@ -1,12 +1,15 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const createLogger = require('../src/common/utils/logger');
 const dbPath = path.join(__dirname, 'currencies.db');
+
+const log = createLogger("Database");
 
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
-        console.error('Ошибка подключения к БД: ', err.message);
+        log.error('Ошибка подключения к БД: ', err.message);
     } else {
-        console.log('Подключение к БД установлено');
+        log.info('Подключение к БД установлено');
     }
 });
 
