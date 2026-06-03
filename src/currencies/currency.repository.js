@@ -1,4 +1,4 @@
-const db = require('../../db/connection');
+const db = require('../infrastructure/database/connection');
 const createLogger = require('../common/utils/logger');
 const log = createLogger("CurrencyRepository");
 

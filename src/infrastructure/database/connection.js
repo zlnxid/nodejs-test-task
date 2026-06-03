@@ -1,9 +1,9 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const createLogger = require('../src/common/utils/logger');
-const dbPath = path.join(__dirname, 'currencies.db');
-
+const createLogger = require('../../common/utils/logger');
 const log = createLogger("Database");
+
+const dbPath = path.join(__dirname, './currency.db');
 
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {

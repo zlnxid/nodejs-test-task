@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node db/init.js && jest",
+    "test": "node src/infrastructure/database/initialization.js && jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "db:init": "node db/init.js"
+    "db:init": "node src/infrastructure/database/initialization.js"
   },
   "private": true,
   "keywords": [],

@@ -1,5 +1,5 @@
 const db = require('./connection');
-const createLogger = require('../src/common/utils/logger');
+const createLogger = require('../../common/utils/logger');
 const log = createLogger("DatabaseInit");
 
 const createTable = () => {
