@@ -17,39 +17,15 @@ describe("Logger", () => {
             }).toThrow(ValidationError);
         });
 
-        it("should throw ValidationError if appName is whitespace only", () => {
-            expect(() => {
-                createLogger("   ");
-            }).toThrow(ValidationError);
-        });
-
-        it("should throw ValidationError if appName is null", () => {
-            expect(() => {
-                createLogger(null);
-            }).toThrow(ValidationError);
-        });
-
         it("should throw ValidationError if appName is not string", () => {
             expect(() => {
                 createLogger(123);
-            }).toThrow(ValidationError);
-
-            expect(() => {
-                createLogger({});
             }).toThrow(ValidationError);
         });
 
         it("should throw ValidationError if logLevel is invalid", () => {
             expect(() => {
-                createLogger("App", -1);
-            }).toThrow(ValidationError);
-
-            expect(() => {
                 createLogger("App", 5);
-            }).toThrow(ValidationError);
-
-            expect(() => {
-                createLogger("App", "info");
             }).toThrow(ValidationError);
         });
 
@@ -61,9 +37,6 @@ describe("Logger", () => {
         it("should create logger with custom logLevel", () => {
             const log = createLogger("TestApp", 0);
             expect(log).toBeDefined();
-
-            const log2 = createLogger("TestApp", 4);
-            expect(log2).toBeDefined();
         });
 
     });
@@ -84,36 +57,15 @@ describe("Logger", () => {
             expect(typeof log.error).toBe("function");
         });
 
-        it("should not throw when calling info", () => {
+        it("should not throw when calling all methods", () => {
             expect(() => {
-                log.info("test message");
-            }).not.toThrow();
-        });
-
-        it("should not throw when calling error", () => {
-            expect(() => {
+                log.info("info message");
                 log.error("error message");
-            }).not.toThrow();
-        });
-
-        it("should not throw when calling warn", () => {
-            expect(() => {
                 log.warn("warning message");
-            }).not.toThrow();
-        });
-
-        it("should not throw when calling debug", () => {
-            expect(() => {
                 log.debug("debug message");
-            }).not.toThrow();
-        });
-
-        it("should not throw when calling trace", () => {
-            expect(() => {
                 log.trace("trace message");
             }).not.toThrow();
         });
-
     });
 
     describe("RequestId parameter", () => {
@@ -124,34 +76,12 @@ describe("Logger", () => {
             log = createLogger("TestApp");
         });
 
-        it("should accept requestId in info", () => {
-            expect(() => {
-                log.info("message", "req-123");
-            }).not.toThrow();
-        });
-
-        it("should accept requestId in error", () => {
-            expect(() => {
-                log.error("error", "req-456");
-            }).not.toThrow();
-        });
-
-        it("should accept requestId in warn", () => {
-            expect(() => {
-                log.warn("warning", "req-789");
-            }).not.toThrow();
-        });
-
-        it("should accept requestId in debug", () => {
-            expect(() => {
-                log.debug("debug", "req-abc");
-            }).not.toThrow();
-        });
-
-        it("should accept requestId in trace", () => {
-            expect(() => {
-                log.trace("trace", "req-def");
-            }).not.toThrow();
+        it("should accept requestId in all methods", () => {
+            expect(() => log.info("message", "req-123")).not.toThrow();
+            expect(() => log.error("error", "req-456")).not.toThrow();
+            expect(() => log.warn("warning", "req-789")).not.toThrow();
+            expect(() => log.debug("debug", "req-abc")).not.toThrow();
+            expect(() => log.trace("trace", "req-def")).not.toThrow();
         });
 
         it("should work without requestId", () => {

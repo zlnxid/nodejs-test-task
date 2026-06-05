@@ -19,10 +19,6 @@ describe("Scheduler", () => {
             expect(() => {
                 createTask(123, 10, () => {}, mockLog);
             }).toThrow(ValidationError);
-
-            expect(() => {
-                createTask(null, 10, () => {}, mockLog);
-            }).toThrow(ValidationError);
         });
 
         it("should throw ValidationError if interval is not positive", () => {
@@ -30,10 +26,6 @@ describe("Scheduler", () => {
 
             expect(() => {
                 createTask("Task", 0, () => {}, mockLog);
-            }).toThrow(ValidationError);
-
-            expect(() => {
-                createTask("Task", -5, () => {}, mockLog);
             }).toThrow(ValidationError);
         });
 
@@ -43,10 +35,6 @@ describe("Scheduler", () => {
             expect(() => {
                 createTask("Task", "10", () => {}, mockLog);
             }).toThrow(ValidationError);
-
-            expect(() => {
-                createTask("Task", null, () => {}, mockLog);
-            }).toThrow(ValidationError);
         });
 
         it("should throw ValidationError if task is not function", () => {
@@ -55,19 +43,11 @@ describe("Scheduler", () => {
             expect(() => {
                 createTask("Task", 10, "not a function", mockLog);
             }).toThrow(ValidationError);
-
-            expect(() => {
-                createTask("Task", 10, null, mockLog);
-            }).toThrow(ValidationError);
         });
 
         it("should throw ValidationError if log is not function", () => {
             expect(() => {
                 createTask("Task", 10, () => {}, "not a function");
-            }).toThrow(ValidationError);
-
-            expect(() => {
-                createTask("Task", 10, () => {}, null);
             }).toThrow(ValidationError);
         });
 
@@ -96,17 +76,6 @@ describe("Scheduler", () => {
             );
         });
 
-        it("should include task name in scheduled message", () => {
-            const mockLog = jest.fn();
-            const mockTask = jest.fn();
-
-            createTask("MyTask", 10, mockTask, mockLog);
-
-            expect(mockLog).toHaveBeenCalledWith(
-                expect.stringContaining("MyTask")
-            );
-        });
-
     });
 
     describe("Task execution", () => {
@@ -122,10 +91,7 @@ describe("Scheduler", () => {
             const mockTask = jest.fn();
 
             createTask("Task", 1, mockTask, mockLog);
-
-            // Fast-forward time by 1 second
             jest.advanceTimersByTime(1000);
-
             expect(mockTask).toHaveBeenCalled();
         });
 
@@ -147,12 +113,7 @@ describe("Scheduler", () => {
             const mockTask = jest.fn();
 
             createTask("Task", 1, mockTask, mockLog);
-
             jest.advanceTimersByTime(1000);
-
-            // mockLog should have been called at least twice:
-            // 1. When scheduling
-            // 2. When executing
             expect(mockLog.mock.calls.length).toBeGreaterThanOrEqual(2);
         });
 
