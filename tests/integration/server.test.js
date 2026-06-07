@@ -2,20 +2,24 @@ require("dotenv").config();
 
 const request = require("supertest");
 const createServer = require("../../src/core/server");
-const storage = require("../../src/currencies/currency.storage");
+const repository = require('../../src/currencies/currency.repository');
 
 const server = createServer();
 
-beforeEach(() => {
-    storage.clear();
+beforeEach(async () => {
+    await repository.clear();
 })
+
+const authHeader = {
+    Authorization: `Bearer ${process.env.AUTH_TOKEN}`
+};
 
 describe("GET /status", () => {
 
     it("should return ok", async () => {
         const response = await request(server)
             .get("/status")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(200);
         expect(response.text).toBe("ok");
@@ -27,7 +31,7 @@ describe("Currency CRUD", () => {
     it("should create currency", async () => {
         const response = await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                     name: "Bitcoin",
                     ticker: "BTC"
@@ -42,7 +46,7 @@ describe("Currency CRUD", () => {
     it("should get all currencies", async () => {
         await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Bitcoin",
                 ticker: "BTC"
@@ -50,7 +54,7 @@ describe("Currency CRUD", () => {
 
         const response = await request(server)
             .get("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);
@@ -62,7 +66,7 @@ describe("Currency CRUD", () => {
     it("should get currency by id", async () => {
         const created = await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Bitcoin",
                 ticker: "BTC"
@@ -70,7 +74,7 @@ describe("Currency CRUD", () => {
 
         const response = await request(server)
             .get(`/currencies/${created.body.id}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(200);
         expect(response.body.name).toBe("Bitcoin");
@@ -80,7 +84,7 @@ describe("Currency CRUD", () => {
     it("should update currency", async () => {
         const created = await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Bitcoin",
                 ticker: "BTC"
@@ -88,7 +92,7 @@ describe("Currency CRUD", () => {
 
         const response = await request(server)
             .put(`/currencies/${created.body.id}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Dollar",
                 ticker: "USD"
@@ -100,7 +104,7 @@ describe("Currency CRUD", () => {
 
         const updated = await request(server)
             .get(`/currencies/${created.body.id}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(updated.body.name).toBe("Dollar");
         expect(updated.body.ticker).toBe("USD");
@@ -109,7 +113,7 @@ describe("Currency CRUD", () => {
     it("should delete currency", async () => {
         const created = await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Bitcoin",
                 ticker: "BTC"
@@ -117,13 +121,13 @@ describe("Currency CRUD", () => {
 
         const response = await request(server)
             .delete(`/currencies/${created.body.id}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(204);
 
         const deleted = await request(server)
             .get(`/currencies/${created.body.id}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(deleted.status).toBe(404);
     });
@@ -131,7 +135,7 @@ describe("Currency CRUD", () => {
     it("should return 404 for non-existent", async () => {
         const response = await request(server)
             .get(`/currencies/${1}`)
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(404);
     });
@@ -139,10 +143,30 @@ describe("Currency CRUD", () => {
     it("should return 400 for invalid data", async () => {
         const response = await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({});
         expect(response.status).toBe(400);
     });
+
+    it("should return 409 for duplicate ticker", async () => {
+        await request(server)
+            .post("/currencies")
+            .set(authHeader)
+            .send({
+                name:"Bitcoin",
+                ticker: "BTC"
+            });
+
+        const response = await request(server)
+            .post("/currencies")
+            .set(authHeader)
+            .send({
+                name: "Another Bitcoin",
+                ticker: "BTC"
+            });
+
+        expect(response.status).toBe(409);
+    })
 });
 
 describe("GET /currencies/price", () => {
@@ -150,7 +174,7 @@ describe("GET /currencies/price", () => {
     it("should return prices for valid currency", async () => {
         await request(server)
             .post("/currencies")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`)
+            .set(authHeader)
             .send({
                 name: "Bitcoin",
                 ticker: "BTC"
@@ -158,7 +182,7 @@ describe("GET /currencies/price", () => {
 
         const response = await request(server)
             .get("/currencies/price?currency=BTC")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);
@@ -167,7 +191,7 @@ describe("GET /currencies/price", () => {
     it("should return 400 without currency param", async () => {
         const response = await request(server)
             .get("/currencies/price")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(400);
     });
@@ -175,7 +199,7 @@ describe("GET /currencies/price", () => {
     it("should return 404 for non-existent currency", async () => {
         const response = await request(server)
             .get("/currencies/price?currency=BTC")
-            .set("Authorization", `Bearer ${process.env.AUTH_TOKEN}`);
+            .set(authHeader);
 
         expect(response.status).toBe(404);
     });

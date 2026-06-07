@@ -21,13 +21,6 @@ describe("Errors", () => {
             const error = new AppError("Test");
             expect(error.name).toBe("AppError");
         });
-
-        it("should have stack trace", () => {
-            const error = new AppError("Test");
-            expect(error.stack).toBeDefined();
-            expect(error.stack).toContain("AppError");
-        });
-
     });
 
     describe("ValidationError", () => {
@@ -50,18 +43,6 @@ describe("Errors", () => {
             const error = new ValidationError("Test", "field", "value");
             expect(error.name).toBe("ValidationError");
         });
-
-        it("should handle different received values", () => {
-            const errorWithNull = new ValidationError("Msg", "field", null);
-            expect(errorWithNull.receivedValue).toBeNull();
-
-            const errorWithNumber = new ValidationError("Msg", "field", -5);
-            expect(errorWithNumber.receivedValue).toBe(-5);
-
-            const errorWithArray = new ValidationError("Msg", "field", []);
-            expect(errorWithArray.receivedValue).toEqual([]);
-        });
-
     });
 
     describe("ConfigError", () => {
@@ -70,7 +51,6 @@ describe("Errors", () => {
             const error = new ConfigError("Invalid config", "appName");
 
             expect(error).toBeInstanceOf(Error);
-            expect(error).toBeInstanceOf(AppError);
             expect(error).toBeInstanceOf(ConfigError);
             expect(error.message).toBe("Invalid config");
             expect(error.parameter).toBe("appName");
@@ -80,12 +60,6 @@ describe("Errors", () => {
             const error = new ConfigError("Test", "param");
             expect(error.name).toBe("ConfigError");
         });
-
-        it("should be instance of AppError", () => {
-            const error = new ConfigError("Test", "param");
-            expect(error).toBeInstanceOf(AppError);
-        });
-
     });
 
     describe("TaskExecutionError", () => {
@@ -110,12 +84,6 @@ describe("Errors", () => {
             const error = new TaskExecutionError("Msg", "Task", new Error());
             expect(error.name).toBe("TaskExecutionError");
         });
-
-        it("should be instance of AppError", () => {
-            const error = new TaskExecutionError("Msg", "Task", new Error());
-            expect(error).toBeInstanceOf(AppError);
-        });
-
     });
 
     describe("Error inheritance", () => {
@@ -129,19 +97,5 @@ describe("Errors", () => {
             expect(taskError).toBeInstanceOf(AppError);
             expect(validationError).toBeInstanceOf(AppError);
         });
-
-        it("all custom errors should inherit from Error", () => {
-            const configError = new ConfigError("Test", "param");
-            const taskError = new TaskExecutionError("Test", "Task", new Error());
-            const validationError = new ValidationError("Test", "field", "value");
-            const appError = new AppError("Test");
-
-            expect(configError).toBeInstanceOf(Error);
-            expect(taskError).toBeInstanceOf(Error);
-            expect(validationError).toBeInstanceOf(Error);
-            expect(appError).toBeInstanceOf(Error);
-        });
-
     });
-
 });

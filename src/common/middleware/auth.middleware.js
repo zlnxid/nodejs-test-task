@@ -1,5 +1,9 @@
 const authMiddleware = (req, res, next) => {
 
+    if (req.path === '/api-docs' || req.path.startsWith('/api-docs/')) {
+        return next();
+    }
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
