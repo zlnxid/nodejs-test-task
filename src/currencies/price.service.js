@@ -1,40 +1,25 @@
-const axios = require('axios');
-
+const priceRepository = require("./price.repository");
 const createLogger = require("../common/utils/logger");
 const logger = createLogger("PriceService");
 
-const BINANCE_API_URL = process.env.BINANCE_API_URL;
-
-const delay = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 const getPricesByCurrency = async (ticker) => {
 
-    const maxRetries = 3;
+    try {
+        const prices = await priceRepository.getPricesByTicker(ticker);
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-
-            const response = await axios.get(
-                BINANCE_API_URL,
-                {timeout: 5000}
-            );
-
-            const prices = response.data;
-
-            return prices.filter(pair => pair.symbol.includes(ticker.toUpperCase()));
-
-        } catch (error) {
-
-            logger.error(`Binance request failed. Attempt ${attempt}`);
-
-            if (attempt === maxRetries) {
-                throw new Error("Failed to fetch prices from Binance");
-            }
-
-            await delay(1000);
+        if (prices.length === 0) {
+            logger.warn(`Курсы для валюты ${ticker} не найдены`);
+            return [];
         }
+
+        return prices.map(p => ({
+            symbol: p.symbol,
+            price: p.price
+        }));
+
+    } catch (error) {
+        logger.error(`Ошибка при получении курсов валют из БД: ${error.message}`);
+        throw error;
     }
 };
 

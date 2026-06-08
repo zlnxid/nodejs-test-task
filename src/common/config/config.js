@@ -1,7 +1,7 @@
 const {ConfigError} = require("../utils/errors");
 const config = {
     appName: "NodeScheduler",
-    interval: 10
+    interval: 60
 };
 
 function validateConfig(config) {
