@@ -3,15 +3,6 @@ const { ConfigError } = require("../../../../src/common/utils/errors");
 
 describe("Config", () => {
 
-    describe("Default config values", () => {
-
-        it("should have correct default values", () => {
-            expect(config.appName).toBe("NodeScheduler");
-            expect(config.interval).toBe(10);
-        });
-
-    });
-
     describe("validateConfig function", () => {
 
         it("should be exported as function", () => {

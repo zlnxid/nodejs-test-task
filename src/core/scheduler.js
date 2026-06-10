@@ -41,13 +41,24 @@ const createTask = (name, interval, task, log) => {
     const timerId = setInterval(() => {
         log("Executing task: " + name);
 
-        task().catch(error => {
+        try {
+            const result = task();
+            if (result && typeof result.catch === 'function') {
+                result.catch(error => {
+                    throw new TaskExecutionError(
+                        `Error executing task: ${name}`,
+                        name,
+                        error
+                    );
+                });
+            }
+        } catch (error) {
             throw new TaskExecutionError(
                 `Error executing task: ${name}`,
                 name,
                 error
             );
-        });
+        }
     }, interval*1000);
 
     timers.push(timerId);
