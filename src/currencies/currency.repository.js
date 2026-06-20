@@ -1,124 +1,89 @@
 const db = require('../infrastructure/database/connection');
 const createLogger = require('../common/utils/logger');
+const { transactionAsync, runAsync, getAsync, allAsync } = require('../infrastructure/database/connection');
 const log = createLogger("CurrencyRepository");
 
 class CurrencyRepository {
     async getAll() {
-        return new Promise((resolve, reject) => {
-            db.all('SELECT * FROM currencies', (err, rows) => {
-                if (err) {
-                    log.error('Ошибка при получении всех валют: ', err.message);
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
-            });
-        });
+        try {
+            return await allAsync('SELECT * FROM currencies');
+        } catch (err) {
+            log.error('Ошибка при получении всех валют: ', err.message);
+            throw err;
+        }
     }
 
     async getById(id) {
-        return new Promise((resolve, reject) => {
-            db.get('SELECT * FROM currencies WHERE id = ?', [id], (err, row) => {
-                if (err) {
-                    log.error('Ошибка при получении валюты по id: ', err.message);
-                    reject(err);
-                } else {
-                    resolve(row);
-                }
-            });
-        });
+        try {
+            return await getAsync('SELECT * FROM currencies WHERE id = ?', [id]);
+        } catch (err) {
+            log.error('Ошибка при получении валюты по id: ', err.message);
+            throw err;
+        }
     }
 
     async create({name, ticker}) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
+        try {
+            let result;
+            await transactionAsync(async () => {
                 const sql = 'INSERT INTO currencies (name, ticker) VALUES (?, ?)';
-                db.run(sql, [name, ticker], function (err) {
-                    if (err) {
-                        db.run('ROLLBACK');
-                        log.error('Ошибка при создании валюты: ', err.message);
-                        reject(err);
-                    } else {
-                        db.run('COMMIT');
-                        log.info('Валюта создана');
-                        resolve({id: this.lastID, name, ticker});
-                    }
-                });
+                result = await runAsync(sql, [name, ticker]);
             });
-        });
+            log.info('Валюта создана');
+            return {id: result.lastID, name, ticker};
+        } catch (err) {
+            log.error('Ошибка при создании валюты: ', err.message);
+            throw err;
+        }
     }
 
     async update(id, data) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
-                db.get('SELECT * FROM currencies WHERE id = ?', [id], (err, row) => {
-                    if (err) {
-                        db.run('ROLLBACK');
-                        log.error('Ошибка при обновлении валюты: ', err.message);
-                        reject(err);
-                    } else if (!row) {
-                        db.run('ROLLBACK');
-                        log.info('Валюта не найдена');
-                        resolve(null);
-                    } else {
-                        const updateName = data.name ?? row.name;
-                        const updateTicker = data.ticker ?? row.ticker;
-                        const sql = 'UPDATE currencies SET name = ?, ticker = ? WHERE id = ?';
-                        db.run(sql, [updateName, updateTicker, id], function (err) {
-                            if (err) {
-                                db.run('ROLLBACK');
-                                log.error('Ошибка при обновлении валюты: ', err.message);
-                                reject(err);
-                            } else {
-                                db.run('COMMIT');
-                                log.info('Валюта обновлена');
-                                resolve({id: Number(id), name: updateName, ticker: updateTicker});
-                            }
-                        });
-                    }
-                });
+        try {
+            const row = await getAsync('SELECT * FROM currencies WHERE id = ?', [id]);
+            if (!row) {
+                log.info('Валюта не найдена');
+                return null;
+            }
+            const updateName = data.name ?? row.name;
+            const updateTicker = data.ticker ?? row.ticker;
+
+            await transactionAsync(async () => {
+                const sql = 'UPDATE currencies SET name = ?, ticker = ? WHERE id = ?';
+                await runAsync(sql, [updateName, updateTicker, id]);
             });
-        });
+
+            log.info('Валюта обновлена');
+            return {id: Number(id), name: updateName, ticker: updateTicker};
+        } catch (err) {
+            log.error('Ошибка при обновлении валюты: ', err.message);
+            throw err;
+        }
     }
 
     async remove(id) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
-                db.run('DELETE FROM currencies WHERE id = ?', [id], function (err) {
-                    if (err) {
-                        db.run('ROLLBACK');
-                        log.error('Ошибка при удалении валюты: ', err.message);
-                        reject(err);
-                    } else {
-                        db.run('COMMIT');
-                        log.info('Валюта c id ' + id + ' удалена');
-                        resolve(this.changes > 0);
-                    }
-                });
+        try {
+            let result;
+            await transactionAsync(async () => {
+                result = await runAsync('DELETE FROM currencies WHERE id = ?', [id]);
             });
-        });
+            log.info('Валюта c id ' + id + ' удалена');
+            return result.changes > 0;
+        } catch (err) {
+            log.error('Ошибка при удалении валюты: ', err.message);
+            throw err;
+        }
     }
 
     async clear() {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
-                db.run('DELETE FROM currencies', (err) => {
-                    if (err) {
-                        db.run('ROLLBACK');
-                        log.error('Ошибка при удалении всех валют: ', err.message);
-                        reject(err);
-                    } else {
-                        db.run('COMMIT');
-                        log.info('Все валюты удалены');
-                        resolve();
-                    }
-                });
+        try {
+            await transactionAsync(async () => {
+                await runAsync('DELETE FROM currencies');
             });
-        })
+            log.info('Все валюты удалены');
+        } catch (err) {
+            log.error('Ошибка при удалении всех валют: ', err.message);
+            throw err;
+        }
     }
 }
 
