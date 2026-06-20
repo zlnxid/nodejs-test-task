@@ -1,4 +1,4 @@
-const createTask = require("../../../src/core/scheduler");
+const { createTask } = require("../../../src/core/scheduler");
 const { ValidationError, TaskExecutionError } = require("../../../src/common/utils/errors");
 
 describe("Scheduler", () => {

@@ -3,8 +3,9 @@ require('dotenv').config();
 const {ValidationError, TaskExecutionError, ConfigError} = require("./src/common/utils/errors");
 const config = require('./src/common/config/config');
 const createLogger = require('./src/common/utils/logger');
-const createTask = require('./src/core/scheduler');
+const { createTask, stopAllTasks } = require('./src/core/scheduler');
 const createServer = require('./src/core/server');
+const updatePriceTask = require('./src/tasks/updatePricesTask');
 
 const log = createLogger(config.appName);
 
@@ -14,19 +15,34 @@ try {
     const logWrapper = (message) => log.info(message);
 
     createTask(
-        "Running task",
+        "Update currency prices from Binance",
         config.interval,
-        () => {
-            log.info("running")
-        },
+        updatePriceTask,
         logWrapper
     );
 
-    const server = createServer();
+    const app = createServer();
 
-    server.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         log.info("Server is running on port: " + PORT);
     });
+
+    const gracefulShutdown = (signal) => {
+        log.info(`Received ${signal}, stopping tasks and closing server`);
+        stopAllTasks();
+        server.close(() => {
+            log.info("Server closed");
+            process.exit(0);
+        });
+
+        setTimeout(() => {
+            log.error("Server did not close in 10 seconds, force exit");
+            process.exit(1);
+        }, 10000);
+    };
+
+    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 } catch (error) {
 

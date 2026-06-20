@@ -1,5 +1,7 @@
 const { ValidationError, TaskExecutionError } = require("../common/utils/errors");
 
+const timers = [];
+
 const createTask = (name, interval, task, log) => {
 
     if (typeof name !== "string" || name.trim() === "") {
@@ -36,11 +38,20 @@ const createTask = (name, interval, task, log) => {
 
     log(`Task scheduled: ${name}`);
 
-    setInterval(() => {
+    const timerId = setInterval(() => {
         log("Executing task: " + name);
 
         try {
-            task();
+            const result = task();
+            if (result && typeof result.catch === 'function') {
+                result.catch(error => {
+                    throw new TaskExecutionError(
+                        `Error executing task: ${name}`,
+                        name,
+                        error
+                    );
+                });
+            }
         } catch (error) {
             throw new TaskExecutionError(
                 `Error executing task: ${name}`,
@@ -49,6 +60,14 @@ const createTask = (name, interval, task, log) => {
             );
         }
     }, interval*1000);
-}
 
-module.exports = createTask;
+    timers.push(timerId);
+    return timerId;
+};
+
+const stopAllTasks = () => {
+    timers.forEach(timerId => clearInterval(timerId));
+    timers.length = 0;
+};
+
+module.exports = { createTask, stopAllTasks };
